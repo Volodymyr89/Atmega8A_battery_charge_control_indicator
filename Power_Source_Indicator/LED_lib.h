@@ -9,7 +9,8 @@
 #ifndef LED_LIB_H_
 #define LED_LIB_H_
 
-
+void leds_check_greeting_startup(void);
+void leds_init(void);
 
 
 

@@ -9,7 +9,10 @@
 #ifndef ADC_LIB_H_
 #define ADC_LIB_H_
 
-
+typedef struct adc_data{
+	uint8_t CH1;
+	uint8_t CH2;
+}adc_data_t;
 
 
 

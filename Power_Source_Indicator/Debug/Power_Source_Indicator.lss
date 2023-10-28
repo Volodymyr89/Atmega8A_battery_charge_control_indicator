@@ -63,8 +63,8 @@ Disassembly of section .text:
   36:	e4 cf       	rjmp	.-56     	; 0x0 <__vectors>
 
 00000038 <main>:
-
 #include <avr/io.h>
+#include "config.h"
 
 
 int main(void)

@@ -7,6 +7,48 @@ Discarded input sections
 
  .data          0x00000000        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega8a/avr4/crtatmega8a.o
  .bss           0x00000000        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega8a/avr4/crtatmega8a.o
+ .text          0x00000000        0x0 ADC_lib.o
+ .data          0x00000000        0x0 ADC_lib.o
+ .bss           0x00000000        0x0 ADC_lib.o
+ .text.adc_init
+                0x00000000        0xe ADC_lib.o
+ .text.adc_select_adc0_channel
+                0x00000000        0x8 ADC_lib.o
+ .text.adc_select_adc1_channel
+                0x00000000        0x8 ADC_lib.o
+ .text.adc_enable
+                0x00000000       0x14 ADC_lib.o
+ .text.adc_start_convertion
+                0x00000000        0x8 ADC_lib.o
+ .debug_info    0x00000000       0xf6 ADC_lib.o
+ .debug_abbrev  0x00000000       0x7a ADC_lib.o
+ .debug_loc     0x00000000       0x3a ADC_lib.o
+ .debug_aranges
+                0x00000000       0x40 ADC_lib.o
+ .debug_ranges  0x00000000       0x30 ADC_lib.o
+ .debug_line    0x00000000      0x10e ADC_lib.o
+ .debug_str     0x00000000      0x1dc ADC_lib.o
+ .comment       0x00000000       0x31 ADC_lib.o
+ .debug_frame   0x00000000       0x64 ADC_lib.o
+ .text          0x00000000        0x0 LED_lib.o
+ .data          0x00000000        0x0 LED_lib.o
+ .bss           0x00000000        0x0 LED_lib.o
+ .text.leds_init
+                0x00000000        0x8 LED_lib.o
+ .text.leds_check_greeting_startup
+                0x00000000       0x88 LED_lib.o
+ .text.leds_show_status
+                0x00000000        0x2 LED_lib.o
+ .debug_info    0x00000000      0x21b LED_lib.o
+ .debug_abbrev  0x00000000      0x141 LED_lib.o
+ .debug_loc     0x00000000      0x116 LED_lib.o
+ .debug_aranges
+                0x00000000       0x30 LED_lib.o
+ .debug_ranges  0x00000000       0x20 LED_lib.o
+ .debug_line    0x00000000      0x1a9 LED_lib.o
+ .debug_str     0x00000000      0x213 LED_lib.o
+ .comment       0x00000000       0x31 LED_lib.o
+ .debug_frame   0x00000000       0x44 LED_lib.o
  .text          0x00000000        0x0 main.o
  .data          0x00000000        0x0 main.o
  .bss           0x00000000        0x0 main.o
@@ -42,6 +84,8 @@ user_signatures  0x00850000         0x00000400         rw !x
 Linker script and memory map
 
 LOAD C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega8a/avr4/crtatmega8a.o
+LOAD ADC_lib.o
+LOAD LED_lib.o
 LOAD main.o
 START GROUP
 LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr4\libm.a

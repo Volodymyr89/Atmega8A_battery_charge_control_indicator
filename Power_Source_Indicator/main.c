@@ -4,10 +4,10 @@
  * Created: 10/26/2023 12:05:23 PM
  * Author : VolodymyrBatih
  */ 
-#define F_CPU 1000000
+
 
 #include <avr/io.h>
-#include <config.h>
+#include "config.h"
 
 
 int main(void)
