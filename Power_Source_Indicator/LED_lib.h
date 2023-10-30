@@ -11,6 +11,8 @@
 
 void leds_check_greeting_startup(void);
 void leds_init(void);
+void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status);
+bool charger_status(void);
 
 
 
