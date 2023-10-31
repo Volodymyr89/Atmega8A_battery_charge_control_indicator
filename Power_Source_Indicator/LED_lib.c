@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include "ADC_lib.h"
 #include "config.h"
+#include "TIMER0_lib.h"
 
 adc_data_t adc_data;
 
@@ -34,11 +35,77 @@ void leds_check_greeting_startup(void){
 }
 
 void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status){
-	for (uint8_t i=0; i<=3; i++){
-		//if (adc_data.CH0 <= BATT_LOW){
-		//	PORTD |= (1<<i);
-		//}
+	static bool timer_set_4s = false;
+	static bool timer_set_300ms = false;
+	static uint8_t shift_led_blink = 0;
+	
+	if(charger_plugged_in_status){
+		
+			if (adc_data.CH0 < BATT_LOW){
+				shift_led_blink = 0;
+			}
+			else if (adc_data.CH0 >= BATT_LOW){
+				shift_led_blink = 1;				
+				PORTD |= 1<<0x00;
+			}
+			else if (adc_data.CH0 >= BATT_MID){
+				shift_led_blink = 2;
+				PORTD |= 1<<0x03;
+			}
+			else if (adc_data.CH0 >= BATT_ALMOST_FULL){
+				shift_led_blink = 3;				
+				PORTD |= 1<<0x07;
+			}
+			else if (adc_data.CH0 >= BATT_FULL){
+				PORTD = 0x0F; //don't reset LEDs				
+				_delay_ms(300);
+				PORTD = 0x00; //reset LEDs
+			}
+			if(adc_data.CH0 > BATT_FULL){
+				if(!timer_set_4s){
+					timer_set_4s = true;
+					timer_set_300ms = false;
+					if (timer1_delay(4000) == TIMER_OK){}
+				}
+				else{
+					PORTD ^= 1<<shift_led_blink;
+					if(!timer_set_300ms){
+						timer_set_300ms = true;
+						timer_set_4s = false;
+						if (timer1_delay(4000) == TIMER_OK){}
+					}
+				}
+			}
 	}
+	else{
+		if(!timer_set_4s){
+			timer_set_4s = true;
+			timer_set_300ms = false;
+			if (timer1_delay(4000) == TIMER_OK){}
+		}		
+		if (adc_data.CH0 < BATT_LOW){
+			PORTD = 0x00; //reset all LEDs
+		}
+		else if (adc_data.CH0 >= BATT_LOW){
+			
+			PORTD = 0x01; // LED0
+		}
+		else if (adc_data.CH0 >= BATT_MID){
+			
+			PORTD = 0x03; // LED0, 1
+		}
+		else if (adc_data.CH0 >= BATT_ALMOST_FULL){
+			
+			PORTD = 0x07; // LED0, 1, 2
+		}
+		else if (adc_data.CH0 >= BATT_FULL){
+			PORTD = 0x0F; // LED0, 1, 2, 3
+		}
+		_delay_ms(300);
+		PORTD = 0x00; //reset LEDs
+	}
+
+	
 }
 
 bool charger_status(void){

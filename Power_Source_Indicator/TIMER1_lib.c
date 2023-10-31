@@ -19,8 +19,8 @@ timer_status_t  timer1_delay(uint16_t time_period_ms){
 		uint16_t delay = time_period_ms/64*1000;
 		uint8_t low_byte = delay & 0xFF;
 		uint8_t high_byte = (delay>>8) & 0xFF;
-		TCNT1L = low_byte;
-		TCNT1H = high_byte;
+		TCNT1L = (uint8_t)low_byte;
+		TCNT1H = (uint8_t)high_byte;
 		TCCR1B |= 1<<CS10 | 1<<CS11; // start timer, 64 divider
 		return TIMER_OK;
 	}

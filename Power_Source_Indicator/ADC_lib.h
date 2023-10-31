@@ -23,7 +23,7 @@ void adc_init(void);
 void adc_select_adc0_channel(void);
 void adc_select_adc1_channel(void);
 void adc_enable(bool adc_enable);
-void adc_start_convertion(void);
+void adc_start_conversion(void);
 
 
 #endif /* ADC_LIB_H_ */

@@ -1,10 +1,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define BATT_FULL 
-#define BATT_ALMOST_FULL
-#define BATT_MID
-#define BATT_LOW
+#define BATT_FULL 300
+#define BATT_ALMOST_FULL 300
+#define BATT_MID 300
+#define BATT_LOW 300
 
 #define CHARGER_PLUGGED_IN  (PINB&(1<<PINB6))
 

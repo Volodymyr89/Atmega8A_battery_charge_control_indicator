@@ -31,6 +31,6 @@ void adc_select_adc1_channel(void){
 
 
 
-void adc_start_convertion(void){
+void adc_start_conversion(void){
 	ADCSRA |= 1<<ADSC; //start conversion
 }
