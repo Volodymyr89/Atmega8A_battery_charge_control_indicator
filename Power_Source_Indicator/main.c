@@ -29,6 +29,8 @@ int main(void)
 	adc_init();
 	timer1_init();
 	adc_enable(true);
+	relay_control(CHARGER_RELAY_OFF);
+	relay_control(OUT_RELAY_OFF);
 	sei(); // enable global interrupt
 	
 	if (charger_status()){
@@ -54,6 +56,12 @@ int main(void)
 					if(ADCSRA&(1<<ADIF)){
 						adc_data.CH1=ADCL;
 					}
+				if((adc_data.CH0) && (adc_data.CH1) >= BATT_FULL){
+					relay_control(CHARGER_RELAY_OFF);
+				}
+				else if((adc_data.CH0) && (adc_data.CH1) <= BATT_FULL_HYSTERESIS){
+					relay_control(CHARGER_RELAY_ON);
+				}
 				leds_show_status(adc_data, charger_status());
 			}
 	}

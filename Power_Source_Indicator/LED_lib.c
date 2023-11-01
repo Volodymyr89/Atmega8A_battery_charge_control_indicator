@@ -11,12 +11,28 @@
 #include "ADC_lib.h"
 #include "config.h"
 #include "TIMER0_lib.h"
+#include "LED_lib.h"
 
 adc_data_t adc_data;
 
 void leds_init(void){
 	DDRD |= 1<<PORTD0 | 1<<PORTD1 | 1<<PORTD2 | 1<<PORTD3;  // set as outputs 
-	PORTD &= ~(1<<PORTD0); // set zeros
+	PORTD = 0x00; // set zeros
+}
+
+void relay_control(relay_control_t relay_control){
+	if (relay_control == CHARGER_RELAY_ON){
+		CHARGER_TO_BATTERY_RELAY_ON;
+	}
+	else if (relay_control == CHARGER_RELAY_OFF){
+		CHARGER_TO_BATTERY_RELAY_OFF;
+	}
+	else if (relay_control == OUT_RELAY_ON){
+		BATTERY_TO_OUT_RELAY_ON;
+	}
+	else if (relay_control == OUT_RELAY_OFF){
+		BATTERY_TO_OUT_RELAY_OFF;
+	}
 }
 
 void leds_check_greeting_startup(void){
@@ -25,8 +41,10 @@ void leds_check_greeting_startup(void){
 			_delay_ms(100);
 			PORTD |= 1<<i;
 		}
-		PORTD=8U;
-		_delay_ms(100);
+		for(uint8_t i=0; i<3; i++){
+			_delay_ms(100);
+			PORTD &= ~(1<<i);
+		}
 		for(uint8_t i=3; i>=0; i--){
 			_delay_ms(100);
 			PORTD &= ~(1<<i);
@@ -39,29 +57,29 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 	static bool timer_set_300ms = false;
 	static uint8_t shift_led_blink = 0;
 	
-	if(charger_plugged_in_status){
-		
-			if (adc_data.CH0 < BATT_LOW){
+	if(charger_plugged_in_status){	
+	COOLER_ON;
+			if ((adc_data.CH0) && (adc_data.CH1) < BATT_LOW){
 				shift_led_blink = 0;
 			}
-			else if (adc_data.CH0 >= BATT_LOW){
+			else if ((adc_data.CH0) && (adc_data.CH1) >= BATT_LOW){
 				shift_led_blink = 1;				
 				PORTD |= 1<<0x00;
 			}
-			else if (adc_data.CH0 >= BATT_MID){
+			else if ((adc_data.CH0) && (adc_data.CH1) >= BATT_MID){
 				shift_led_blink = 2;
 				PORTD |= 1<<0x03;
 			}
-			else if (adc_data.CH0 >= BATT_ALMOST_FULL){
+			else if ((adc_data.CH0) && (adc_data.CH1) >= BATT_ALMOST_FULL){
 				shift_led_blink = 3;				
 				PORTD |= 1<<0x07;
 			}
-			else if (adc_data.CH0 >= BATT_FULL){
+			else if ((adc_data.CH0) && (adc_data.CH1) >= BATT_FULL){
 				PORTD = 0x0F; //don't reset LEDs				
 				_delay_ms(300);
 				PORTD = 0x00; //reset LEDs
 			}
-			if(adc_data.CH0 > BATT_FULL){
+			if((adc_data.CH0) && (adc_data.CH1) > BATT_FULL){
 				if(!timer_set_4s){
 					timer_set_4s = true;
 					timer_set_300ms = false;
@@ -78,6 +96,7 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 			}
 	}
 	else{
+		COOLER_OFF;
 		if(!timer_set_4s){
 			timer_set_4s = true;
 			timer_set_300ms = false;
