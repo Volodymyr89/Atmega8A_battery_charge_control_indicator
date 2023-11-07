@@ -25,7 +25,7 @@ int main(void)
 {
 	adc_data_t adc_data={0,0};
 		
-	COOLER_OFF;r
+	COOLER_OFF;
 		
 	leds_and_pins_init();
 	adc_init();
