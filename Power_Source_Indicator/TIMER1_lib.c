@@ -9,20 +9,28 @@
 #include "TIMER0_lib.h"
 
 
-void timer1_init(void){
-	TCCR1B = 0x00; //timer stopped
-	TIMSK |= 1<<TOIE1; // overflow interrupt enable
-}
 
 timer_status_t  timer1_delay(uint16_t time_period_ms){
+
 	if(time_period_ms <= 4000){
-		uint16_t delay = time_period_ms/64*1000;
-		uint8_t low_byte = delay & 0xFF;
-		uint8_t high_byte = (delay>>8) & 0xFF;
-		TCNT1L = (uint8_t)low_byte;
-		TCNT1H = (uint8_t)high_byte;
+		cli();
+		TCCR1B |= 1<<WGM12;
+		/* Disable interrupts */
+		uint16_t delay = (time_period_ms/64)*1000;
+		OCR1A = delay;
+		/* Restore Global Interrupt Flag */
 		TCCR1B |= 1<<CS10 | 1<<CS11; // start timer, 64 divider
+		TIMSK |= (1<<OCIE1A); // overflow interrupt enable
+		sei();
 		return TIMER_OK;
 	}
 		return TIMER_ERROR;
 }
+
+void fail(void){
+	while(1){
+		PORTD ^= 1<<PORTD0;
+		_delay_ms(70); //fail
+	}
+}
+

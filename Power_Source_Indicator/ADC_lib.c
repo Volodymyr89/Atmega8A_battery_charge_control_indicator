@@ -5,32 +5,35 @@
  *  Author: VolodymyrBatih
  */ 
 
-	#include "ADC_lib.h"
+#include <stddef.h>
+#include "ADC_lib.h"
+#include "config.h"
+
+
 	
-void adc_enable(bool adc_enable){
-	if (adc_enable){
-		ADCSRA |= 1<<ADEN;
-	}
-	else{
-		ADCSRA &= ~(1<<ADEN);
-	}
-}
 void adc_init(void){
-	adc_enable(false);
-	ADMUX |= 1<<REFS0 | 1<<REFS1; // select ref source, and left align
+	ADMUX |= 1<<REFS0 | 1<<REFS1; // select internal ref source
 	ADCSRA |= 1<<ADPS0 | 1<<ADPS1 | 1<<ADPS2; // 128 prescaler
 }
 
-void adc_select_adc0_channel(void){
-	ADMUX &= ~(1<<MUX0); //sel 0 channel
+
+void adc_read(adc_data_t *adcdata){
+	if(adcdata != NULL){
+		uint16_t adc_data = 0;
+		ADCSRA |= (1<<ADEN); 
+		ADMUX &= ADC_CHANNEL0; //reset first 4 channels ADC0
+		ADCSRA |= 1<<ADSC; //start conversion
+		while (ADCSRA&(1<<ADSC)){} //wait until conversion is complete
+		adc_data = ADCL;
+		adc_data |= (ADCH<<8);
+		adcdata->ADC_CH0 = adc_data;
+		ADMUX |= ADC_CHANNEL1; // ADC1
+		ADCSRA |= 1<<ADSC; //start conversion
+		while (ADCSRA&(1<<ADSC)){} //wait until conversion is complete
+		adc_data = ADCL;
+		adc_data |= (ADCH<<8);
+		adcdata->ADC_CH1 = adc_data;
+		//ADCSRA &= ~(1<<ADEN); // disable ADC	
+		}
 }
 
-void adc_select_adc1_channel(void){
-	ADMUX |= 1<<MUX0;
-}
-
-
-
-void adc_start_conversion(void){
-	ADCSRA |= 1<<ADSC; //start conversion
-}
