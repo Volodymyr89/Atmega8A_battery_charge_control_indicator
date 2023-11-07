@@ -1,3 +1,4 @@
 #ignore Debug folder
 Debug/
-../.vs/Power_Source_Indicator/v14/.atsuo
+.vs/Power_Source_Indicator/v14/.atsuo
+.vs/
