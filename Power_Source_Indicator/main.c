@@ -36,7 +36,6 @@ int main(void)
 	leds_check_greeting_startup();
 	
 	if (charger_status()){
-		relay_control(OUT_RELAY_ON);
 		if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){}
 			else{fail();}
 	}
@@ -47,13 +46,13 @@ int main(void)
 
     while (1) 
     {
+			if(charger_status()){
+				relay_control(OUT_RELAY_ON);
+			}else{
+				relay_control(OUT_RELAY_OFF);
+			}
 			if(isr_run_adc_convertion){
 				isr_run_adc_convertion=false;
-				if(charger_status()){
-					relay_control(OUT_RELAY_ON);
-				}else{
-					relay_control(OUT_RELAY_OFF);
-				}
 				adc_read(&adc_data);
 				leds_show_status(adc_data, charger_status());
 			}
