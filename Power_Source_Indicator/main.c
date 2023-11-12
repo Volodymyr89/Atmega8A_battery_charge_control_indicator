@@ -10,7 +10,7 @@
 #include <avr/io.h>
 #include "config.h"
 #include "ADC_lib.h"
-#include "TIMER0_lib.h"
+#include "TIMER1_lib.h"
 #include "LED_lib.h"
 
 volatile bool isr_run_adc_convertion = false;

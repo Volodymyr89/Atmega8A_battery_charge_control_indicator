@@ -9,9 +9,10 @@
 #include <avr/io.h>
 #include "ADC_lib.h"
 #include "config.h"
-#include "TIMER0_lib.h"
+#include "TIMER1_lib.h"
 #include "LED_lib.h"
 
+bool go_up = true;
 
 void leds_and_pins_init(void){
 	DDRD |= (1<<PORTD0) | (1<<PORTD1) | (1<<PORTD2) | (1<<PORTD3) | (1<<PORTD5);  // set as outputs
@@ -63,16 +64,18 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 			toggle ^= 1;
 			if ((adc_data.ADC_CH0<=BATT_LOW)&&(adc_data.ADC_CH1<=BATT_LOW)){
 				COOLER_ON;
+				go_up = true;
 				relay_control(CHARGER_RELAY_ON);
 					if(!timer_300ms_set){
 						timer_300ms_set = true;
 						timer_4s_set = false;
 						if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){} // set timer to blink for 300ms
 						else{fail();}
-					}			
+					}
 				toggle_state = 0;//LED0
-			}else if ((adc_data.ADC_CH0>BATT_LOW)&&(adc_data.ADC_CH1>BATT_LOW)&&(adc_data.ADC_CH0<=BATT_MID)&&(adc_data.ADC_CH1<=BATT_MID)){		
+			}else if (((adc_data.ADC_CH0>BATT_LOW)&&(adc_data.ADC_CH1>BATT_LOW))&&((adc_data.ADC_CH0<=BATT_MID)&&(adc_data.ADC_CH1<=BATT_MID))){		
 				COOLER_ON;
+				go_up = true;
 				relay_control(CHARGER_RELAY_ON);
 					if(!timer_300ms_set){
 						timer_300ms_set = true;
@@ -81,8 +84,9 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 						else{fail();}
 					}				
 				toggle_state = 1; //LED1
-			}else if ((adc_data.ADC_CH0>BATT_MID)&&(adc_data.ADC_CH1>BATT_MID)&&((adc_data.ADC_CH0<=BATT_ALMOST_FULL)&&(adc_data.ADC_CH1<=BATT_ALMOST_FULL))){	
+			}else if ((adc_data.ADC_CH0>BATT_MID)&&(adc_data.ADC_CH1>BATT_MID)&&(adc_data.ADC_CH0<=BATT_ALMOST_FULL)&&(adc_data.ADC_CH1<=BATT_ALMOST_FULL)){	
 				COOLER_ON;
+				go_up = true;
 				relay_control(CHARGER_RELAY_ON);
 					if(!timer_300ms_set){
 						timer_300ms_set = true;
@@ -91,20 +95,20 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 						else{fail();}
 					}			
 				toggle_state = 2; //LED2
-			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&((adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL))&&((adc_data.ADC_CH0<=BATT_FULL_HYSTERESIS)&&(adc_data.ADC_CH1<=BATT_FULL_HYSTERESIS)))){
+			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)&&(go_up==true)){
+				go_up = true;
+				relay_control(CHARGER_RELAY_ON);
 					if(!timer_300ms_set){
-						COOLER_ON;
-						relay_control(CHARGER_RELAY_ON);
 						timer_300ms_set = true;
 						timer_4s_set = false;
 						if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){} // set timer to blink for 300ms
 						else{fail();}
 					}
-				relay_control(CHARGER_RELAY_ON);
 				toggle_state = 3; //LED3
-			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)&&((adc_data.ADC_CH0>BATT_FULL_HYSTERESIS)&&(adc_data.ADC_CH1>BATT_FULL_HYSTERESIS))){
-				toggle_state = 3;
+			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)&&(adc_data.ADC_CH0<BATT_FULL_HYSTERESIS)&&(adc_data.ADC_CH1<BATT_FULL_HYSTERESIS)&&(go_up == false)){
+				relay_control(CHARGER_RELAY_ON);
 			}else if ((adc_data.ADC_CH0>=BATT_FULL)&&(adc_data.ADC_CH1>=BATT_FULL)){
+				go_up = false;
 				relay_control(CHARGER_RELAY_OFF);
 				if(!timer_4s_set){
 					timer_4s_set = true;
@@ -154,7 +158,7 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 				toggle ? (PORTD |= (1<<0x02)) : (PORTD &= ~(1<<0x02));
 				break;
 			case 3:
-				PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02); // BAT_FULL
+				PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02); 
 				PORTD &= ~(1<<0x03);
 				toggle ? (PORTD |= (1<<0x03)) : (PORTD &= ~(1<<0x03));
 				break;
