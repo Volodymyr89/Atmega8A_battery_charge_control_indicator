@@ -16,8 +16,6 @@
 typedef enum relay_control{
 	CHARGER_RELAY_OFF,
 	CHARGER_RELAY_ON,
-	OUT_RELAY_ON,
-	OUT_RELAY_OFF
 }relay_control_t;
 
 

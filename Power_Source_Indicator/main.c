@@ -30,8 +30,8 @@ int main(void)
 	leds_and_pins_init();
 	adc_init();
 	
-	relay_control(CHARGER_RELAY_OFF);
-	relay_control(OUT_RELAY_OFF);
+
+	relay_control(CHARGER_RELAY_ON);
 
 	leds_check_greeting_startup();
 	
@@ -46,10 +46,8 @@ int main(void)
 
     while (1) 
     {
-			if(charger_status()){
-				relay_control(OUT_RELAY_ON);
-			}else{
-				relay_control(OUT_RELAY_OFF);
+			if(!(charger_status())){
+				relay_control(CHARGER_RELAY_ON);
 			}
 			if(isr_run_adc_convertion){
 				isr_run_adc_convertion=false;

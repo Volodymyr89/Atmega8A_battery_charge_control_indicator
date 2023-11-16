@@ -28,29 +28,24 @@ void relay_control(relay_control_t relay_control){
 	else if (relay_control == CHARGER_RELAY_OFF){
 		CHARGER_TO_BATTERY_RELAY_OFF;
 	}
-	else if (relay_control == OUT_RELAY_ON){
-		BATTERY_TO_OUT_RELAY_ON;
-	}
-	else if (relay_control == OUT_RELAY_OFF){
-		BATTERY_TO_OUT_RELAY_OFF;
-	}
 }
 
 void leds_check_greeting_startup(void){
 	
 		for(uint8_t i=0; i<=3; i++){
-			_delay_ms(100);
+			_delay_ms(130);
 			PORTD |= 1<<i;
 		}
 		for(uint8_t i=0; i<3; i++){
-			_delay_ms(100);
+			_delay_ms(130);
 			PORTD &= ~(1<<i);
 		}
 		for(uint8_t i=3; i>0; i--){
-			_delay_ms(100);
+			_delay_ms(130);
 			PORTD &= ~(1<<i);
 			PORTD |= 1<<(i-1);
 		}
+		_delay_ms(130);
 		PORTD &= ~(0x0F);
 }
 
