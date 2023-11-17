@@ -92,6 +92,7 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 				toggle_state = 2; //LED2
 			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)&&(go_up==true)){
 				go_up = true;
+				COOLER_ON;
 				relay_control(CHARGER_RELAY_ON);
 					if(!timer_300ms_set){
 						timer_300ms_set = true;
@@ -118,7 +119,7 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 			else{
 				if(!timer_4s_set){
 				    COOLER_OFF;
-				    relay_control(CHARGER_RELAY_OFF);
+				    relay_control(CHARGER_RELAY_ON);
 					timer_4s_set = true;
 					timer_300ms_set = false;
 					if (timer1_delay(TIMER_FOR_DISCHARGING) == TIMER_OK){} // set timer to blink for 4s

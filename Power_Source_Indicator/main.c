@@ -24,15 +24,12 @@ ISR(TIMER1_COMPA_vect)
 int main(void)
 {
 	adc_data_t adc_data={0,0};
-		
+	relay_control(CHARGER_RELAY_ON);	
 	COOLER_OFF;
 		
 	leds_and_pins_init();
 	adc_init();
 	
-
-	relay_control(CHARGER_RELAY_ON);
-
 	leds_check_greeting_startup();
 	
 	if (charger_status()){
