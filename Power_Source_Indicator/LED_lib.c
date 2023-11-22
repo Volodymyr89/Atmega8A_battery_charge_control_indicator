@@ -33,19 +33,19 @@ void relay_control(relay_control_t relay_control){
 void leds_check_greeting_startup(void){
 	
 		for(uint8_t i=0; i<=3; i++){
-			_delay_ms(130);
+			_delay_ms(150);
 			PORTD |= 1<<i;
 		}
 		for(uint8_t i=0; i<3; i++){
-			_delay_ms(130);
+			_delay_ms(150);
 			PORTD &= ~(1<<i);
 		}
 		for(uint8_t i=3; i>0; i--){
-			_delay_ms(130);
+			_delay_ms(150);
 			PORTD &= ~(1<<i);
 			PORTD |= 1<<(i-1);
 		}
-		_delay_ms(130);
+		_delay_ms(150);
 		PORTD &= ~(0x0F);
 }
 
@@ -140,50 +140,49 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 						
 		switch(toggle_state){
 			case 0: 
-				PORTD &= ~(1<<0x01);
-				toggle ? (PORTD |= (1<<0x00)) : (PORTD &= ~(1<<0x00)); //BAT_LOW
+				PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02);
+				toggle ? (PORTD |= (1<<0x03)) : (PORTD &= ~(1<<0x03)); //BAT_LOW
 				break;
 			case 1:
-				PORTD |= (1<<0x00); // BAT_MID
-				PORTD &= ~(1<<0x02);
-				toggle ? (PORTD |= (1<<0x01)) : (PORTD &= ~(1<<0x01));
-				break;
-			case 2:
-				PORTD |= (1<<0x00) | (1<<0x01); // BAT_ALMOST_FULL
-				PORTD &= ~(1<<0x03);
+				PORTD |= (1<<0x03); // BAT_MID
+				PORTD &= ~(1<<0x00) & (1<<0x01);
 				toggle ? (PORTD |= (1<<0x02)) : (PORTD &= ~(1<<0x02));
 				break;
+			case 2:
+				PORTD |= (1<<0x03) | (1<<0x02); // BAT_ALMOST_FULL
+				PORTD &= ~(1<<0x00);
+				toggle ? (PORTD |= (1<<0x01)) : (PORTD &= ~(1<<0x01));
+				break;
 			case 3:
-				PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02); 
-				PORTD &= ~(1<<0x03);
-				toggle ? (PORTD |= (1<<0x03)) : (PORTD &= ~(1<<0x03));
+				PORTD |= (1<<0x01) | (1<<0x02) | (1<<0x03); 
+				toggle ? (PORTD |= (1<<0x00)) : (PORTD &= ~(1<<0x00));
 				break;
 			case 4:		
 				PORTD |= 0x0F;
-				_delay_ms(100);
+				_delay_ms(200);
 				PORTD &= ~(0x0F);//reset all LEDs
 				break;
              case 5:
 				 PORTD &= ~(0x0F); //reset all LEDs
 				 break;
 			 case 6:
-				 PORTD |= (1<<0x00); // LED0
-				 _delay_ms(100);
+				 PORTD |= (1<<0x03); // LED0
+				 _delay_ms(200);
 				 PORTD &= ~(0x0F); //reset all LEDs
 				 break;
 			 case 7:
-				 PORTD |= (1<<0x00) | (1<<0x01); // LED0, 1
-				 _delay_ms(100);
+				 PORTD |= (1<<0x03) | (1<<0x02); // LED0, 1
+				 _delay_ms(200);
 				 PORTD &= ~(0x0F); //reset all LEDs				 
 				 break;
 			 case 8:
-				PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02); // LED0, 1, 2
-				 _delay_ms(100);
+				PORTD |= (1<<0x01) | (1<<0x02) | (1<<0x03); // LED0, 1, 2
+				 _delay_ms(200);
 				 PORTD &= ~(0x0F); //reset all LEDs
 				 break;
 			 case 9:
 			   PORTD |= 0x0F; // LED0, 1, 2, 3
-				_delay_ms(100);
+				_delay_ms(200);
 			   PORTD &= ~(0x0F); //reset all LEDs	
 		}	
 	}

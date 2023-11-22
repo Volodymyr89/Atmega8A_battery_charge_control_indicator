@@ -19,8 +19,6 @@
 #define CHARGER_PLUGGED_IN			 (PINB&(1<<PINB6))
 #define CHARGER_TO_BATTERY_RELAY_ON  (PORTD &= ~(1<<PORTD5))
 #define CHARGER_TO_BATTERY_RELAY_OFF (PORTD |= 1<<PORTD5)
-//#define BATTERY_TO_OUT_RELAY_ON      
-//#define BATTERY_TO_OUT_RELAY_OFF	 ()
 #define COOLER_ON					 (PORTB |= 1<<PORTB1)
 #define COOLER_OFF					 (PORTB &= ~(1<<PORTB1))				 
 

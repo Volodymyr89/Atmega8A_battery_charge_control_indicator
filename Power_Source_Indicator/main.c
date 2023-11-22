@@ -29,7 +29,7 @@ int main(void)
 		
 	leds_and_pins_init();
 	adc_init();
-	
+	adc_read(&adc_data);
 	leds_check_greeting_startup();
 	
 	if (charger_status()){
