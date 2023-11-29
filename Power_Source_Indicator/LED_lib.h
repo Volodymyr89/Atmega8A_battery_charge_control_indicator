@@ -14,8 +14,8 @@
 #include <util/delay.h>
 
 typedef enum relay_control{
-	CHARGER_RELAY_OFF,
-	CHARGER_RELAY_ON,
+	CHARGER_OFF,
+	CHARGER_ON,
 }relay_control_t;
 
 

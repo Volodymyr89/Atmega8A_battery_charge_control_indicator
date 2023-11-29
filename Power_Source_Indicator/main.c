@@ -24,13 +24,12 @@ ISR(TIMER1_COMPA_vect)
 int main(void)
 {
 	adc_data_t adc_data={0,0};
-	relay_control(CHARGER_RELAY_ON);	
+	relay_control(CHARGER_OFF);	
 	COOLER_OFF;
 		
 	leds_and_pins_init();
 	adc_init();
 	adc_read(&adc_data);
-	leds_check_greeting_startup();
 	
 	if (charger_status()){
 		if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){}
@@ -40,17 +39,16 @@ int main(void)
 		if (timer1_delay(TIMER_FOR_DISCHARGING) == TIMER_OK){}
 		else{fail();}
 	}
+	
+	leds_check_greeting_startup();
 
     while (1) 
     {
-			if(!(charger_status())){
-				relay_control(CHARGER_RELAY_ON);
-			}
-			if(isr_run_adc_convertion){
-				isr_run_adc_convertion=false;
-				adc_read(&adc_data);
-				leds_show_status(adc_data, charger_status());
-			}
+		if(isr_run_adc_convertion){
+			isr_run_adc_convertion=false;
+			adc_read(&adc_data);
+			leds_show_status(adc_data, charger_status());
+		}
 	}
 
 }
