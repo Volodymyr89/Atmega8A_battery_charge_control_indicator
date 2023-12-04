@@ -13,6 +13,7 @@
 #include "LED_lib.h"
 
 bool go_up = true;
+uint16_t timer = 2000;
 
 void leds_and_pins_init(void){
 	DDRD |= (1<<PORTD0) | (1<<PORTD1) | (1<<PORTD2) | (1<<PORTD3) | (1<<PORTD5);  // set as outputs
@@ -32,18 +33,18 @@ void relay_control(relay_control_t relay_control){
 
 void leds_check_greeting_startup(void){
 	
-		for(uint8_t i=3; i>0; i--){
+		for(int8_t i=3; i>=0; i--){
 			_delay_ms(150);
 			PORTD |= 1<<i;
 		}
-		for(uint8_t i=3; i>0; i--){
+		for(int8_t i=3; i>0; i--){
 			_delay_ms(150);
 			PORTD &= ~(1<<i);
 		}
 		for(uint8_t i=0; i<=3; i++){
 			_delay_ms(150);
 			PORTD &= ~(1<<i);
-			PORTD |= 1<<(i-1);
+			PORTD |= 1<<(i+1);
 		}
 		_delay_ms(150);
 		PORTD &= ~(0x0F);
@@ -58,6 +59,7 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 	if(charger_plugged_in_status){
 			toggle ^= 1;
 			if ((adc_data.ADC_CH0<=BATT_LOW)&&(adc_data.ADC_CH1<=BATT_LOW)){
+				timer = 1000;
 				COOLER_ON;
 				go_up = true;
 				relay_control(CHARGER_ON);
@@ -69,6 +71,7 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 					}
 				toggle_state = 0;//LED0
 			}else if (((adc_data.ADC_CH0>BATT_LOW)&&(adc_data.ADC_CH1>BATT_LOW))&&((adc_data.ADC_CH0<=BATT_MID)&&(adc_data.ADC_CH1<=BATT_MID))){		
+				timer = 1000;
 				COOLER_ON;
 				go_up = true;
 				relay_control(CHARGER_ON);
@@ -80,6 +83,7 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 					}				
 				toggle_state = 1; //LED1
 			}else if ((adc_data.ADC_CH0>BATT_MID)&&(adc_data.ADC_CH1>BATT_MID)&&(adc_data.ADC_CH0<=BATT_ALMOST_FULL)&&(adc_data.ADC_CH1<=BATT_ALMOST_FULL)){	
+				timer = 1000;
 				COOLER_ON;
 				go_up = true;
 				relay_control(CHARGER_ON);
@@ -92,7 +96,8 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 				toggle_state = 2; //LED2
 			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)&&(go_up==true)){
 				go_up = true;
-				COOLER_OFF;
+				timer = 1000;
+				COOLER_ON;
 				relay_control(CHARGER_ON);
 					if(!timer_300ms_set){
 						timer_300ms_set = true;
@@ -104,19 +109,22 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)&&(adc_data.ADC_CH0<BATT_FULL_HYSTERESIS)&&(adc_data.ADC_CH1<BATT_FULL_HYSTERESIS)&&(go_up == false)){
 				relay_control(CHARGER_ON);
 			}else if ((adc_data.ADC_CH0>=BATT_FULL)&&(adc_data.ADC_CH1>=BATT_FULL)){
-				go_up = false;
-				relay_control(CHARGER_OFF);
-				if(!timer_4s_set){
-					timer_4s_set = true;
-					timer_300ms_set = false;
+				if(timer > 0){
+					timer--;
 					COOLER_OFF;
-					if (timer1_delay(TIMER_FOR_DISCHARGING) == TIMER_OK){} // set timer to 4s
-					else{fail();}
-				}
-				toggle_state = 4;			 
+				}else{
+					go_up = false;
+					relay_control(CHARGER_OFF);
+					if(!timer_4s_set){
+						timer_4s_set = true;
+						timer_300ms_set = false;
+						if (timer1_delay(TIMER_FOR_DISCHARGING) == TIMER_OK){} // set timer to 4s
+						else{fail();}
+					}
+					toggle_state = 4;	
+				}	
 			}
-		}
-			else{
+		}else{
 				if(!timer_4s_set){
 				    COOLER_OFF;
 				    relay_control(CHARGER_OFF);

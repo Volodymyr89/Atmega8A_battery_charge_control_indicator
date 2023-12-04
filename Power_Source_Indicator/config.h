@@ -8,7 +8,7 @@
 #define TIMER_FOR_DISCHARGING        4000
 
 //thresholds
-#define BATT_FULL 944           //25.2/11/0.0025 (reference Voltage is 2.56V) full bat is 25.2V (916)
+#define BATT_FULL 960           //25.2/11/0.0025 (reference Voltage is 2.56V) full bat is 25.2V (916)
 #define BATT_FULL_HYSTERESIS 927 //24.7/11/0.0025
 #define BATT_ALMOST_FULL 890     //23.7/11/0.0025
 #define BATT_MID 835             //22.2/11/0.0025
