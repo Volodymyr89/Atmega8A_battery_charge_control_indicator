@@ -13,7 +13,7 @@
 #define BATT_ALMOST_FULL     890 //23.7/11/0.0025
 #define BATT_MID             835 //22.2/11/0.0025
 #define BATT_LOW             755 //20/11/0.0025
-#define TEMPERATURE_LOW      755 // temperature is low enough to disable cooler
+#define TEMPERATURE_LOW      960 // temperature is low enough to disable cooler
 //thresholds end
 
 

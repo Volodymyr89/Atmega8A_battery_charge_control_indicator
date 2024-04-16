@@ -135,7 +135,7 @@ void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status)
 			{
 				PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02) | (1<<0x03);
 			}
-			_delay_ms(150);
+			//_delay_ms(150);
 			display_counter = 11;	
 		}
 		else
