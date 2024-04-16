@@ -5,14 +5,15 @@
 #define ADC_CHANNEL1 (1<<0)
 
 #define TIMER_FOR_CHARGING           190
-#define TIMER_FOR_DISCHARGING        4000
+#define TIMER_FOR_DISCHARGING        500
 
 //thresholds
-#define BATT_FULL 960           //25.2/11/0.0025 (reference Voltage is 2.56V) full bat is 25.2V (916)
+#define BATT_FULL            960 //25.2/11/0.0025 (reference Voltage is 2.56V) full bat is 25.2V (916)
 #define BATT_FULL_HYSTERESIS 927 //24.7/11/0.0025
-#define BATT_ALMOST_FULL 890     //23.7/11/0.0025
-#define BATT_MID 835             //22.2/11/0.0025
-#define BATT_LOW 755             //20/11/0.0025
+#define BATT_ALMOST_FULL     890 //23.7/11/0.0025
+#define BATT_MID             835 //22.2/11/0.0025
+#define BATT_LOW             755 //20/11/0.0025
+#define TEMPERATURE_LOW      755 // temperature is low enough to disable cooler
 //thresholds end
 
 

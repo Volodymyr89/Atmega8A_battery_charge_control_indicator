@@ -30,22 +30,21 @@ int main(void)
 	leds_and_pins_init();
 	adc_init();
 	adc_read(&adc_data);
-	
-	if (charger_status()){
-		if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){}
-			else{fail();}
-	}
-	else{
-		if (timer1_delay(TIMER_FOR_DISCHARGING) == TIMER_OK){}
-		else{fail();}
-	}
-	
 	leds_check_greeting_startup();
 
     while (1) 
-    {
-		if(isr_run_adc_convertion){
-			isr_run_adc_convertion=false;
+    {	
+      	if (charger_status() == true){
+	      	if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){}
+	      	else{fail();}
+      	}
+      	else{
+	      	if (timer1_delay(TIMER_FOR_DISCHARGING) == TIMER_OK){}
+	      	else{fail();}
+      	}
+			
+		if(isr_run_adc_convertion == true){
+			isr_run_adc_convertion = false;
 			adc_read(&adc_data);
 			leds_show_status(adc_data, charger_status());
 		}

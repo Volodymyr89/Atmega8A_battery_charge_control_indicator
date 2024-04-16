@@ -12,14 +12,13 @@
 
 timer_status_t  timer1_delay(uint16_t time_period_ms){
 
-	if(time_period_ms <= 4000){
-		cli();
+	if(time_period_ms <= 523){
+		cli(); //Disable interrupts 
 		TCCR1B |= 1<<WGM12;
-		/* Disable interrupts */
-		uint16_t delay = (time_period_ms/64)*1000;
+		uint16_t delay = (uint16_t)((float)(time_period_ms/8) * 1000);
 		OCR1A = delay;
 		/* Restore Global Interrupt Flag */
-		TCCR1B |= 1<<CS10 | 1<<CS11; // start timer, 64 divider
+		TCCR1B |= 1<<CS11; // start timer, 8 divider
 		TIMSK |= (1<<OCIE1A); // overflow interrupt enable
 		sei();
 		return TIMER_OK;

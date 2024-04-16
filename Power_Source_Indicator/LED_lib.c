@@ -12,8 +12,16 @@
 #include "TIMER1_lib.h"
 #include "LED_lib.h"
 
-bool go_up = true;
-uint16_t timer = 2000;
+typedef enum 
+{
+  state_0 = 0,
+  state_1,
+  state_2,
+  state_3
+}VOLTAGE_STATE_enum;
+
+uint8_t  display_counter = 11;
+
 
 void leds_and_pins_init(void){
 	DDRD |= (1<<PORTD0) | (1<<PORTD1) | (1<<PORTD2) | (1<<PORTD3) | (1<<PORTD5);  // set as outputs
@@ -51,148 +59,92 @@ void leds_check_greeting_startup(void){
 }
 
 void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status){
-	static bool timer_4s_set = false;
-	static bool timer_300ms_set = false;
-	static uint8_t toggle_state = 0;
-	static uint8_t toggle = 0;
-
-	if(charger_plugged_in_status){
-			toggle ^= 1;
-			if ((adc_data.ADC_CH0<=BATT_LOW)&&(adc_data.ADC_CH1<=BATT_LOW)){
-				timer = 1000;
-				COOLER_ON;
-				go_up = true;
-				relay_control(CHARGER_ON);
-					if(!timer_300ms_set){
-						timer_300ms_set = true;
-						timer_4s_set = false;
-						if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){} // set timer to blink for 300ms
-						else{fail();}
-					}
-				toggle_state = 0;//LED0
-			}else if (((adc_data.ADC_CH0>BATT_LOW)&&(adc_data.ADC_CH1>BATT_LOW))&&((adc_data.ADC_CH0<=BATT_MID)&&(adc_data.ADC_CH1<=BATT_MID))){		
-				timer = 1000;
-				COOLER_ON;
-				go_up = true;
-				relay_control(CHARGER_ON);
-					if(!timer_300ms_set){
-						timer_300ms_set = true;
-						timer_4s_set = false;
-						if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){} // set timer to blink for 300ms
-						else{fail();}
-					}				
-				toggle_state = 1; //LED1
-			}else if ((adc_data.ADC_CH0>BATT_MID)&&(adc_data.ADC_CH1>BATT_MID)&&(adc_data.ADC_CH0<=BATT_ALMOST_FULL)&&(adc_data.ADC_CH1<=BATT_ALMOST_FULL)){	
-				timer = 1000;
-				COOLER_ON;
-				go_up = true;
-				relay_control(CHARGER_ON);
-					if(!timer_300ms_set){
-						timer_300ms_set = true;
-						timer_4s_set = false;
-						if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){} // set timer to blink for 300ms
-						else{fail();}
-					}			
-				toggle_state = 2; //LED2
-			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)&&(go_up==true)){
-				go_up = true;
-				timer = 1000;
-				COOLER_ON;
-				relay_control(CHARGER_ON);
-					if(!timer_300ms_set){
-						timer_300ms_set = true;
-						timer_4s_set = false;
-						if (timer1_delay(TIMER_FOR_CHARGING) == TIMER_OK){} // set timer to blink for 300ms
-						else{fail();}
-					}
-				toggle_state = 3; //LED3
-			}else if ((adc_data.ADC_CH0>BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)&&(adc_data.ADC_CH0<BATT_FULL_HYSTERESIS)&&(adc_data.ADC_CH1<BATT_FULL_HYSTERESIS)&&(go_up == false)){
-				relay_control(CHARGER_ON);
-			}else if ((adc_data.ADC_CH0>=BATT_FULL)&&(adc_data.ADC_CH1>=BATT_FULL)){
-				if(timer > 0){
-					timer--;
-					COOLER_OFF;
-				}else{
-					go_up = false;
-					relay_control(CHARGER_OFF);
-					if(!timer_4s_set){
-						timer_4s_set = true;
-						timer_300ms_set = false;
-						if (timer1_delay(TIMER_FOR_DISCHARGING) == TIMER_OK){} // set timer to 4s
-						else{fail();}
-					}
-					toggle_state = 4;	
-				}	
+    
+	VOLTAGE_STATE_enum  voltage_state_t;
+	uint16_t voltage_threshold = adc_data.ADC_CH0;
+	uint16_t temperature_threshold = adc_data.ADC_CH1;
+    
+	
+	if(charger_plugged_in_status)
+	{
+		if (temperature_threshold >= TEMPERATURE_LOW)
+		{
+		  COOLER_OFF;
+		}
+		else
+		{
+		  COOLER_ON;
+		}
+			
+		if (voltage_threshold < BATT_LOW)
+		{
+		  PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02) & (1<<0x03);
+		}
+		if (voltage_threshold > BATT_LOW)
+		{
+	      PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02);
+		  PORTD |= (1<<0x03);
+		}
+		if (voltage_threshold > BATT_MID)
+		{
+		  PORTD &= ~(1<<0x00) & (1<<0x01);
+	      PORTD |= (1<<0x02) | (1<<0x03);
+		}
+		if (voltage_threshold > BATT_ALMOST_FULL)
+		{
+		  PORTD &= ~(1<<0x00);
+		  PORTD |= (1<<0x01) | (1<<0x02) | (1<<0x03);
+		}
+		if (voltage_threshold > BATT_FULL)
+		{
+		  relay_control(CHARGER_OFF);
+		  PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02) | (1<<0x03);
+		}
+		else
+		{
+		  relay_control(CHARGER_ON);
+		}			
+	 }
+	 else 
+	 { 
+		COOLER_OFF;
+		relay_control(CHARGER_OFF);
+		display_counter--;
+		if (display_counter <= 1)
+		{
+			if (voltage_threshold < BATT_LOW)
+			{
+				PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02) & (1<<0x03);
 			}
-		}else{
-				if(!timer_4s_set){
-				    COOLER_OFF;
-				    relay_control(CHARGER_OFF);
-					timer_4s_set = true;
-					timer_300ms_set = false;
-					if (timer1_delay(TIMER_FOR_DISCHARGING) == TIMER_OK){} // set timer to blink for 4s
-					else{fail();}
-				}
-				if ((adc_data.ADC_CH0<BATT_LOW)&&(adc_data.ADC_CH1<BATT_LOW)){
-					toggle_state = 5;
-				}else if ((adc_data.ADC_CH0>=BATT_LOW)&&(adc_data.ADC_CH1>=BATT_LOW)&&(adc_data.ADC_CH0<BATT_MID)&&(adc_data.ADC_CH1<BATT_MID)){
-					toggle_state = 6;
-				}else if ((adc_data.ADC_CH0>=BATT_MID)&&(adc_data.ADC_CH1>=BATT_MID)&&(adc_data.ADC_CH0<BATT_ALMOST_FULL)&&(adc_data.ADC_CH1<BATT_ALMOST_FULL)){
-					toggle_state = 7;
-				}else if ((adc_data.ADC_CH0>=BATT_ALMOST_FULL)&&(adc_data.ADC_CH1>=BATT_ALMOST_FULL)&&(adc_data.ADC_CH0<BATT_FULL)&&(adc_data.ADC_CH1<BATT_FULL)){
-					toggle_state = 8;
-				}else if ((adc_data.ADC_CH0>=BATT_FULL)&&(adc_data.ADC_CH1>=BATT_FULL)){
-					toggle_state = 9;
-				}
-			}
-						
-		switch(toggle_state){
-			case 0: 
+			if (voltage_threshold > BATT_LOW)
+			{
 				PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02);
-				toggle ? (PORTD |= (1<<0x03)) : (PORTD &= ~(1<<0x03)); //BAT_LOW
-				break;
-			case 1:
-				PORTD |= (1<<0x03); // BAT_MID
+				PORTD |= (1<<0x03);
+			}
+			if (voltage_threshold > BATT_MID)
+			{
 				PORTD &= ~(1<<0x00) & (1<<0x01);
-				toggle ? (PORTD |= (1<<0x02)) : (PORTD &= ~(1<<0x02));
-				break;
-			case 2:
-				PORTD |= (1<<0x03) | (1<<0x02); // BAT_ALMOST_FULL
+				PORTD |= (1<<0x02) | (1<<0x03);
+			}
+			if (voltage_threshold > BATT_ALMOST_FULL)
+			{
 				PORTD &= ~(1<<0x00);
-				toggle ? (PORTD |= (1<<0x01)) : (PORTD &= ~(1<<0x01));
-				break;
-			case 3:
-				PORTD |= (1<<0x01) | (1<<0x02) | (1<<0x03); 
-				toggle ? (PORTD |= (1<<0x00)) : (PORTD &= ~(1<<0x00));
-				break;
-			case 4:		
-				PORTD |= 0x0F;
-				_delay_ms(200);
-				PORTD &= ~(0x0F);//reset all LEDs
-				break;
-             case 5:
-				 PORTD &= ~(0x0F); //reset all LEDs
-				 break;
-			 case 6:
-				 PORTD |= (1<<0x03); // LED0
-				 _delay_ms(200);
-				 PORTD &= ~(0x0F); //reset all LEDs
-				 break;
-			 case 7:
-				 PORTD |= (1<<0x03) | (1<<0x02); // LED0, 1
-				 _delay_ms(200);
-				 PORTD &= ~(0x0F); //reset all LEDs				 
-				 break;
-			 case 8:
-				PORTD |= (1<<0x01) | (1<<0x02) | (1<<0x03); // LED0, 1, 2
-				 _delay_ms(200);
-				 PORTD &= ~(0x0F); //reset all LEDs
-				 break;
-			 case 9:
-			   PORTD |= 0x0F; // LED0, 1, 2, 3
-				_delay_ms(200);
-			   PORTD &= ~(0x0F); //reset all LEDs	
-		}	
+				PORTD |= (1<<0x01) | (1<<0x02) | (1<<0x03);
+			}
+			if (voltage_threshold > BATT_FULL)
+			{
+				PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02) | (1<<0x03);
+			}
+			_delay_ms(150);
+			display_counter = 11;	
+		}
+		else
+		{
+			PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02) & (1<<0x03);
+		}
+		 
+	 }
+			
 	}
 
 
