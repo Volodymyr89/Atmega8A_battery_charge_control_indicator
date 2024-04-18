@@ -34,6 +34,6 @@ void adc_read(adc_data_t *adcdata){
 		adc_data |= (ADCH<<8);
 		adcdata->ADC_CH1 = adc_data;
 		//ADCSRA &= ~(1<<ADEN); // disable ADC	
-		}
+	}
 }
 

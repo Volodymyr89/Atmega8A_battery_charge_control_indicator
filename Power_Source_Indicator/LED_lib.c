@@ -12,16 +12,7 @@
 #include "TIMER1_lib.h"
 #include "LED_lib.h"
 
-typedef enum 
-{
-  state_0 = 0,
-  state_1,
-  state_2,
-  state_3
-}VOLTAGE_STATE_enum;
-
 uint8_t  display_counter = 11;
-
 
 void leds_and_pins_init(void){
 	DDRD |= (1<<PORTD0) | (1<<PORTD1) | (1<<PORTD2) | (1<<PORTD3) | (1<<PORTD5);  // set as outputs
@@ -60,20 +51,27 @@ void leds_check_greeting_startup(void){
 
 void leds_show_status(const adc_data_t adc_data, bool charger_plugged_in_status){
     
-	VOLTAGE_STATE_enum  voltage_state_t;
 	uint16_t voltage_threshold = adc_data.ADC_CH0;
-	uint16_t temperature_threshold = adc_data.ADC_CH1;
-    
+	uint16_t current_temperature = adc_data.ADC_CH1;
+    static uint16_t  temperature_threshold = TEMPERATURE_LOW;
 	
 	if(charger_plugged_in_status)
 	{
-		if (temperature_threshold >= TEMPERATURE_LOW)
+		if (current_temperature <= temperature_threshold)
 		{
-		  COOLER_OFF;
+			if (temperature_threshold == TEMPERATURE_LOW)
+			{
+			   temperature_threshold += 30;
+			}
+			COOLER_ON;
 		}
 		else
 		{
-		  COOLER_ON;
+			if (PORTB &(1<<PORTB1))
+			{
+				temperature_threshold -= 30;
+			}		
+		  COOLER_OFF;
 		}
 			
 		if (voltage_threshold < BATT_LOW)
