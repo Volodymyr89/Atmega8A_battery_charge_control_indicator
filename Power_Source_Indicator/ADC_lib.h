@@ -13,8 +13,8 @@
 #include <stdbool.h>
 	
 typedef struct adc_struct{
-	uint16_t ADC_CH0;
-	uint16_t ADC_CH1;
+	uint16_t CH0_BATT;
+	uint16_t CH1_TEMPERATURE;
 }adc_data_t;
 
 extern adc_data_t adc_data;

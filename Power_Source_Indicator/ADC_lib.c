@@ -21,18 +21,19 @@ void adc_read(adc_data_t *adcdata){
 	if(adcdata != NULL){
 		uint16_t adc_data = 0;
 		ADCSRA |= (1<<ADEN); 
-		ADMUX &= ADC_CHANNEL0; //reset first 4 channels ADC0
+		ADMUX &= ADC_CHANNEL0_BATT; //reset first 4 channels ADC0
 		ADCSRA |= 1<<ADSC; //start conversion
 		while (ADCSRA&(1<<ADSC)){} //wait until conversion is complete
 		adc_data = ADCL;
 		adc_data |= (ADCH<<8);
-		adcdata->ADC_CH0 = adc_data;
-		ADMUX |= ADC_CHANNEL1; // ADC1
+		adcdata->CH0_BATT = adc_data;
+		
+		ADMUX |= ADC_CHANNEL1_TEMPERATURE; // ADC1
 		ADCSRA |= 1<<ADSC; //start conversion
 		while (ADCSRA&(1<<ADSC)){} //wait until conversion is complete
 		adc_data = ADCL;
 		adc_data |= (ADCH<<8);
-		adcdata->ADC_CH1 = adc_data;
+		adcdata->CH1_TEMPERATURE = adc_data;
 		//ADCSRA &= ~(1<<ADEN); // disable ADC	
 	}
 }

@@ -11,6 +11,7 @@
 #include "config.h"
 #include "ADC_lib.h"
 #include "TIMER1_lib.h"
+#include "TIMER2_lib.h"
 #include "LED_lib.h"
 
 volatile bool isr_run_adc_convertion = false;
@@ -23,13 +24,13 @@ ISR(TIMER1_COMPA_vect)
 
 int main(void)
 {
-	adc_data_t adc_data={0,0};
-	relay_control(CHARGER_OFF);	
-	COOLER_OFF;
+	adc_data_t adc_data={0, 0};
+	charger_control(CHARGER_OFF);	
 		
 	leds_and_pins_init();
 	adc_init();
-	adc_read(&adc_data);
+	timer2_pwm_init();
+	pwm_off();
 	leds_check_greeting_startup();
 
     while (1) 
@@ -46,7 +47,7 @@ int main(void)
 		if(isr_run_adc_convertion == true){
 			isr_run_adc_convertion = false;
 			adc_read(&adc_data);
-			leds_show_status(adc_data, charger_status());
+			leds_show_status(&adc_data, charger_status());
 		}
 	}
 
