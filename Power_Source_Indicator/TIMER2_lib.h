@@ -20,7 +20,7 @@ typedef enum pwm_status{
 }pwm_status_t;
 
 void  timer2_pwm_init(void);
-pwm_status_t  timer2_pwm_ctl(uint8_t time_pwm);
+pwm_status_t  timer2_pwm_ctl(uint16_t time_pwm);
 void pwm_on(void);
 void pwm_off(void);
 
