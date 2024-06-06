@@ -14,8 +14,10 @@
 #include "TIMER2_lib.h"
 #include "LED_lib.h"
 
+uint16_t voltage_threshold = BATT_FULL;
 uint16_t current_voltage_threshold = 0;
 bool battey_is_not_full = true;
+uint16_t temperature_threshold = TEMPERATURE_HIGH;
 
 void leds_and_pins_init(void){
 	#ifdef Debug
@@ -80,13 +82,15 @@ void battery_stand_by(void)
 	   	{
 		   	PORTD &= ~(1<<0x00) & (1<<0x01);
 		   	PORTD |= (1<<0x02) | (1<<0x03);
+			battey_is_not_full = true;
 	   	}
 	   	if (current_voltage_threshold > BATT_75_FULL)
 	   	{
 		   	PORTD &= ~(1<<0x00);
 		   	PORTD |= (1<<0x01) | (1<<0x02) | (1<<0x03);
+			battey_is_not_full = true;
 	   	}
-	   	if (current_voltage_threshold >= BATT_FULL)
+	   	if (current_voltage_threshold >= voltage_threshold)
 	   	{
 		   	PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02) | (1<<0x03);
 			battey_is_not_full = false;
@@ -104,54 +108,8 @@ void battery_stand_by(void)
 
 void leds_show_status(const adc_data_t *adc_data, bool charger_plugged_in_status){
 	
-	#ifdef Debug
 	current_voltage_threshold = adc_data->CH0_BATT;
-	static uint8_t cnt = 0;
-	
-	switch (cnt)
-	{
-		case 0:
-		if (current_voltage_threshold > BATT_LOW)
-		{
-			PORTC |= 1<<0x03;
-			cnt++;
-		}
-		break;
-		case 1:
-		if (current_voltage_threshold > BATT_MID)
-		{
-			PORTC |= 1<<0x04;
-			cnt++;
-		}
-		else
-		{
-			PORTC &= ~(1<<0x03) & (1<<0x04) & (1<<0x05);
-			cnt = 0;
-		}
-		break;
-		case 2:
-		if (current_voltage_threshold > BATT_75_FULL)
-		{
-			PORTC |= 1<<0x05;
-			cnt++;
-		}
-		else
-		{
-			PORTC &= ~(1<<0x03) & (1<<0x04) & (1<<0x05);
-			cnt = 0;
-		}
-		break;
-		case 3:
-		PORTC &= ~(1<<0x03) & (1<<0x04) & (1<<0x05);
-		cnt = 0;
-		break;
-
-	}
-	#else
-	current_voltage_threshold = adc_data->CH0_BATT;
-	static uint16_t voltage_threshold = BATT_FULL;
 	uint16_t current_temperature_threshold = adc_data->CH1_TEMPERATURE;
-	static uint16_t temperature_threshold = TEMPERATURE_HIGH;
 	static uint8_t cnt = 0;
 	static bool set_hysteresis_temperature = false;
 	static bool set_hysteresis_voltage = false;
@@ -223,7 +181,7 @@ void leds_show_status(const adc_data_t *adc_data, bool charger_plugged_in_status
 				if(!set_hysteresis_voltage)
 				{
 					set_hysteresis_voltage = true;
-					voltage_threshold -= 10;
+					voltage_threshold -= 20;
 				}
 				PORTD |= 1<<0x00;
 				cnt++;
@@ -233,7 +191,7 @@ void leds_show_status(const adc_data_t *adc_data, bool charger_plugged_in_status
 				if(set_hysteresis_voltage)
 				{
 					set_hysteresis_voltage = false;
-					voltage_threshold += 10;
+					voltage_threshold += 20;
 				}
 				PORTD &= ~(1<<0x03) & (1<<0x02) & (1<<0x01) & (1<<0x00);
 				cnt = 0;				
@@ -250,7 +208,6 @@ void leds_show_status(const adc_data_t *adc_data, bool charger_plugged_in_status
 	{
 		battery_stand_by();
 	}
-	#endif	
 }
 
 
