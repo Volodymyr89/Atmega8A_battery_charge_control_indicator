@@ -21,7 +21,7 @@ typedef enum charger_control{
 
 void leds_check_greeting_startup(void);
 void leds_and_pins_init(void);
-void leds_show_status(const adc_data_t *adc_data, bool charger_plugged_in_status);
+void leds_show_status(bool charger_plugged_in_status, const adc_data_t *adc_data);
 bool charger_status(void);
 void charger_control(charger_control_t charger_control);
 

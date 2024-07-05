@@ -6,10 +6,8 @@
 #define ADC_CHANNEL0_BATT  (~(0x0F))
 #define ADC_CHANNEL1_TEMPERATURE (1<<0)
 
-#define TIMER_FOR_CHARGING           (uint8_t)  500
-#define TIMER_FOR_DISCHARGING        (uint16_t) 500
-
-#define DISPLAY_TIME                 (uint8_t)  10
+#define TIMER_FOR_SCAN           (uint8_t)  500
+#define DISPLAY_TIME             (uint8_t)  10
 
 //thresholds
 #define BATT_FULL            (uint16_t) 385 //4.2V/4.2 = 1000mV/0.0025 = 400 (reference Voltage is 2.56V) 
@@ -19,8 +17,5 @@
 
 #define TEMPERATURE_HIGH      (uint16_t) 1000 // 2.5V temperature is high enough to enable cooler
 //thresholds end
-
-
 #define CHARGER_PLUGGED_IN			 (PINB&(1<<PINB6))			 
-
 #endif

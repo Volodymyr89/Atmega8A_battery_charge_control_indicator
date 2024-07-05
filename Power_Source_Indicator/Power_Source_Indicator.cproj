@@ -29,16 +29,16 @@
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <EraseKey />
     <AsfFrameworkConfig>
-      <framework-data xmlns="">
-        <options />
-        <configurations />
-        <files />
-        <documentation help="" />
-        <offline-documentation help="" />
-        <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.52.0" />
-        </dependencies>
-      </framework-data>
+      <framework-data>
+  <options />
+  <configurations />
+  <files />
+  <documentation help="" />
+  <offline-documentation help="" />
+  <dependencies>
+    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.39.0" />
+  </dependencies>
+</framework-data>
     </AsfFrameworkConfig>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -142,6 +142,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="TIMER1_lib.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="TIMER2_lib.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="TIMER2_lib.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

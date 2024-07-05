@@ -20,16 +20,11 @@ bool battey_is_not_full = true;
 uint16_t temperature_threshold = TEMPERATURE_HIGH;
 
 void leds_and_pins_init(void){
-	#ifdef Debug
-		DDRC |= (1<<PORTC5) | (1<<PORTC4) | (1<<PORTC3);  // set as outputs
-		PORTC = 0; // set zeros
-	#else
 	DDRD |= (1<<PORTD0) | (1<<PORTD1) | (1<<PORTD2) | (1<<PORTD3);  // set as outputs
 	//DDRB |= (1<<PORTB0); // old FAN Control
 	DDRB |= (1<<PORTB3); // FAN PWM
 	PORTD = 0x00; // set zeros
 	PORTB = 0x00; // set zeros
-	#endif
 }
 
 void charger_control(charger_control_t charger_control){
@@ -60,13 +55,21 @@ void leds_check_greeting_startup(void){
 		PORTD &= ~(0x0F);
 }
 
+void idle_mode(void){
+	MCUCR &= ~(1<<SE & 1<<SM0 & 1<<SM1 & 1<<SM2);
+	MCUCR |= 1<<SE;
+}
+
+void operational_mode(void){
+	MCUCR &= ~(1<<SE & 1<<SM0 & 1<<SM1 & 1<<SM2);
+}
+
 void battery_stand_by(void)
 {
 	static uint8_t display_counter = 0;
 		
 	if (display_counter > DISPLAY_TIME)
 	{
-		pwm_off();
 	   	if (current_voltage_threshold < BATT_LOW)
 	   	{
 		   	PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02) & (1<<0x03);
@@ -95,7 +98,7 @@ void battery_stand_by(void)
 		   	PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02) | (1<<0x03);
 			battey_is_not_full = false;
 	   	}  
-		_delay_ms(100);
+		_delay_ms(200);
 		PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02) & (1<<0x03);
 		display_counter = 0;
 	}
@@ -103,45 +106,50 @@ void battery_stand_by(void)
 	{
 	   display_counter++;
 	}
-
 }
 
-void leds_show_status(const adc_data_t *adc_data, bool charger_plugged_in_status){
+
+void check_temperature(const adc_data_t *adc_data){
+	static bool set_hysteresis_temperature = false;	
+	uint16_t current_temperature_threshold = adc_data->CH1_TEMPERATURE;
+	
+	if (current_temperature_threshold < temperature_threshold) // Voltage is less than 2.5V
+    {
+	 if (!set_hysteresis_temperature)
+	 {
+	   set_hysteresis_temperature = true;
+	   temperature_threshold += 20;
+	 }	
+	 if (timer2_pwm_ctl(current_temperature_threshold) == PWM_OK)
+	 {
+	   pwm_on();
+	 }
+	 else
+	 {
+	  fail();
+	 }
+	}
+	else
+	{
+		pwm_off();
+		if (set_hysteresis_temperature)
+		{
+			set_hysteresis_temperature = false;
+			temperature_threshold -= 20;
+		}
+	}
+}
+
+void leds_show_status(bool charger_plugged_in_status, const adc_data_t *adc_data){
 	
 	current_voltage_threshold = adc_data->CH0_BATT;
-	uint16_t current_temperature_threshold = adc_data->CH1_TEMPERATURE;
 	static uint8_t cnt = 0;
-	static bool set_hysteresis_temperature = false;
 	static bool set_hysteresis_voltage = false;
+	
+	check_temperature(adc_data);
 	
 	if(charger_plugged_in_status && battey_is_not_full)
 	{
-		if (current_temperature_threshold < temperature_threshold) // Voltage is less than 2.5V
-		{
-			if (!set_hysteresis_temperature)
-			{
-				set_hysteresis_temperature = true;
-				temperature_threshold += 20;
-			}
-				
-			if (timer2_pwm_ctl(current_temperature_threshold) == PWM_OK)
-			{
-				pwm_on();
-			}
-			else
-			{
-				fail();
-			}
-		}
-		else
-		{
-			pwm_off();
-			if (set_hysteresis_temperature)
-			{
-				set_hysteresis_temperature = false;
-				temperature_threshold -= 20;
-			}
-		}
 		switch (cnt)
 		{
 			case 0:
@@ -199,14 +207,15 @@ void leds_show_status(const adc_data_t *adc_data, bool charger_plugged_in_status
 			break;
 			case 4:
 				PORTD &= ~(1<<0x03) & (1<<0x02) & (1<<0x01) & (1<<0x00);
-				cnt = 0;
 				battey_is_not_full = false;
+				cnt = 0;
 				break;		
 		}
 	}
 	else
 	{
 		battery_stand_by();
+		cnt = 0;
 	}
 }
 
