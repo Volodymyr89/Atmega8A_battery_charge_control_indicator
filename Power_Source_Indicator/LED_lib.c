@@ -56,20 +56,16 @@ void leds_check_greeting_startup(void){
 }
 
 void idle_mode(void){
-	MCUCR &= ~(1<<SE & 1<<SM0 & 1<<SM1 & 1<<SM2);
+	MCUCR &= ~(1<<SE) & (1<<SM0) & (1<<SM1) & (1<<SM2);
 	MCUCR |= 1<<SE;
 }
 
 void operational_mode(void){
-	MCUCR &= ~(1<<SE & 1<<SM0 & 1<<SM1 & 1<<SM2);
+	MCUCR &= ~(1<<SE) & (1<<SM0) & (1<<SM1) & (1<<SM2);
 }
 
 void battery_stand_by(void)
 {
-	static uint8_t display_counter = 0;
-		
-	if (display_counter > DISPLAY_TIME)
-	{
 	   	if (current_voltage_threshold < BATT_LOW)
 	   	{
 		   	PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02) & (1<<0x03);
@@ -100,12 +96,6 @@ void battery_stand_by(void)
 	   	}  
 		_delay_ms(200);
 		PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02) & (1<<0x03);
-		display_counter = 0;
-	}
-	else
-	{
-	   display_counter++;
-	}
 }
 
 
@@ -145,11 +135,20 @@ void leds_show_status(bool charger_plugged_in_status, const adc_data_t *adc_data
 	current_voltage_threshold = adc_data->CH0_BATT;
 	static uint8_t cnt = 0;
 	static bool set_hysteresis_voltage = false;
-	
+	static bool operational_mode_set = false;
+	static bool idle_mode_set = false;
 	check_temperature(adc_data);
 	
 	if(charger_plugged_in_status && battey_is_not_full)
 	{
+		if (operational_mode_set == false){
+			operational_mode_set = true;
+			idle_mode_set = false;
+			operational_mode();
+			timer1_delay(TIMER_FOR_SCAN, DIVIDER8);
+			
+		}
+
 		switch (cnt)
 		{
 			case 0:
@@ -214,8 +213,18 @@ void leds_show_status(bool charger_plugged_in_status, const adc_data_t *adc_data
 	}
 	else
 	{
-		battery_stand_by();
 		cnt = 0;
+		if (idle_mode_set == false){
+			idle_mode_set = true;
+			operational_mode_set = false;
+			timer1_delay(TIMER_FOR_STBY, DIVIDER64);
+			idle_mode();
+		}
+		else{
+			battery_stand_by();
+			idle_mode();	
+		}		
+		
 	}
 }
 

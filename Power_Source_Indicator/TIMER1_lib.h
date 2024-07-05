@@ -19,7 +19,7 @@ typedef enum timer_status{
 	TIMER_ERROR
 }timer_status_t;
 
-timer_status_t  timer1_delay(uint16_t time_period_ms);
+timer_status_t  timer1_delay(uint16_t time_period_ms, uint8_t divider);
 void fail(void);
 
 #endif /* TIMER1_LIB_H_ */
