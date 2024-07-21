@@ -32,8 +32,8 @@ int main(void)
 	timer2_pwm_init();
 	pwm_off();
 	leds_check_greeting_startup();
-	timer1_delay(TIMER_FOR_SCAN, DIVIDER8);
-	timer1_delay(TIMER_FOR_STBY, DIVIDER64);
+	timer1_delay_scan(TIMER_FOR_SCAN);
+	
 		
     while (1) 
     {	

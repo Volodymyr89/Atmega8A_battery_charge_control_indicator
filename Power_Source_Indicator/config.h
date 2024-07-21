@@ -6,10 +6,10 @@
 #define ADC_CHANNEL0_BATT  (~(0x0F))
 #define ADC_CHANNEL1_TEMPERATURE (1<<0)
 
-#define TIMER_FOR_SCAN           (uint8_t)  255
-#define TIMER_FOR_STBY           (uint16_t) 3000
-#define DIVIDER8                 (uint8_t) CS11
-#define DIVIDER64                (uint8_t) CS10 | CS11
+#define TIMER_FOR_SCAN           (uint16_t) 14000
+#define TIMER_FOR_STBY           (uint16_t) 60000
+#define DIVIDER8_MODE            (uint8_t) CS11
+
 
 //thresholds
 #define BATT_FULL            (uint16_t) 385 //4.2V/4.2 = 1000mV/0.0025 = 400 (reference Voltage is 2.56V) 

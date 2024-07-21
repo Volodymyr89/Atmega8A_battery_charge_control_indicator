@@ -94,7 +94,7 @@ void battery_stand_by(void)
 		   	PORTD |= (1<<0x00) | (1<<0x01) | (1<<0x02) | (1<<0x03);
 			battey_is_not_full = false;
 	   	}  
-		_delay_ms(200);
+		_delay_ms(100);
 		PORTD &= ~(1<<0x00) & (1<<0x01) & (1<<0x02) & (1<<0x03);
 }
 
@@ -144,8 +144,8 @@ void leds_show_status(bool charger_plugged_in_status, const adc_data_t *adc_data
 		if (operational_mode_set == false){
 			operational_mode_set = true;
 			idle_mode_set = false;
-			operational_mode();
-			timer1_delay(TIMER_FOR_SCAN, DIVIDER8);
+			//operational_mode();
+			timer1_delay_scan(TIMER_FOR_SCAN);
 			
 		}
 
@@ -217,12 +217,12 @@ void leds_show_status(bool charger_plugged_in_status, const adc_data_t *adc_data
 		if (idle_mode_set == false){
 			idle_mode_set = true;
 			operational_mode_set = false;
-			timer1_delay(TIMER_FOR_STBY, DIVIDER64);
-			idle_mode();
+			timer1_delay_stby(TIMER_FOR_STBY);
+			//idle_mode();
 		}
 		else{
 			battery_stand_by();
-			idle_mode();	
+			//idle_mode();	
 		}		
 		
 	}
